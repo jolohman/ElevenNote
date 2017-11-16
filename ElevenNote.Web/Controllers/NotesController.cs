@@ -98,7 +98,7 @@ namespace ElevenNote.Web.Controllers
         {
             var model = CreateNoteService().GetNoteById(id);
 
-            return View();
+            return View(model);
         }
 
         [HttpPost]
