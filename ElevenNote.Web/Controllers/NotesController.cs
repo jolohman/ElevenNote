@@ -18,12 +18,12 @@ namespace ElevenNote.Web.Controllers
             var svc = new NoteService(userId);
 
             return svc;
-        } 
+        }
 
         // GET: Notes
         public ActionResult Index()
         {
-            
+
             var model = CreateNoteService().GetNotes();
             return View(model);
         }
@@ -51,11 +51,64 @@ namespace ElevenNote.Web.Controllers
 
         public ActionResult Details(int id)
         {
-            var model = CreateNoteService().GetNoteById( id );
+            var model = CreateNoteService().GetNoteById(id);
 
             return View(model);
         }
 
-        
+        public ActionResult Edit(int id)
+        {
+            var detailModel = CreateNoteService().GetNoteById(id);
+            var editModel =
+                new NoteEditModel
+                {
+                    NoteId = detailModel.NoteId,
+                    Title = detailModel.Title,
+                    Content = detailModel.Content
+
+                };
+
+            return View(editModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(int id, NoteEditModel model)
+        {
+            if (model.NoteId != id)
+            {
+                ModelState.AddModelError("", "Nice Try!");
+                model.NoteId = id;
+                return View(model);
+            }
+
+            if (!ModelState.IsValid) return View(model);
+
+            if (!CreateNoteService().UpdateNote(model))
+            {
+                ModelState.AddModelError("", "Unable to update note");
+                return View(model);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [ActionName("Delete")]
+        public ActionResult DeleteGet(int id)
+        {
+            var model = CreateNoteService().GetNoteById(id);
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Delete")]
+        public ActionResult DeletePost(int id)
+        {
+            CreateNoteService().DeleteNote(id);
+
+            return RedirectToAction("Index");
+        }
     }
 }
